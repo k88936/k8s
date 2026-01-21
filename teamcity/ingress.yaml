@@ -1,0 +1,35 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: teamcity-k88936-top
+  namespace: teamcity
+spec:
+  secretName: teamcity-tls
+  dnsNames:
+    - teamcity.k88936.top
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: teamcity
+  namespace: teamcity
+spec:
+  tls:
+    - hosts:
+        - teamcity.k88936.top
+      secretName: teamcity-tls
+  rules:
+    - host: teamcity.k88936.top
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: teamcity
+                port:
+                  number: 8111

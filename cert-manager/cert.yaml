@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: k88936-top
+  namespace: cert-manager
+spec:
+  secretName: k88936-top-tls
+  dnsNames:
+  - k88936.top
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer

@@ -1,0 +1,49 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+  namespace: cloudreve
+data:
+  ariar_rpc_secret: "SfjVZkcChibbbxwg8Jzh7V4rBy"    # aria2 的rpc秘钥
+  # cloudreve的 conf.ini配置文件，不要添加 ; 注释。
+  conf.ini: |
+    [System] 
+    Mode = master 
+    Listen = :5212 
+    Debug = false 
+    SessionSecret = qntbzmZMyfkEtLn24rwwWVKCBG 
+    HashIDSalt = y85thQLqYs3BECgZfuJPf58sM2 
+    [Database] 
+    Type = mysql 
+    Port = 3306 
+    User = clodreve 
+    Password = xxxxxxxxxx 
+    Host = 192.168.50.112 
+    Name = clodreve 
+    TablePrefix = cd_ 
+    Charset = utf8mb4 
+    [Slave] 
+    Secret = 1234567891234567123456789123456712345678912345671234567891234567 
+    CallbackTimeout = 20 
+    SignatureTTL = 60 
+    [CORS] 
+    AllowOrigins = * 
+    AllowMethods = OPTIONS,GET,POST 
+    AllowHeaders = * 
+    AllowCredentials = false 
+    [Redis] 
+    Server = cloudreve-redis:6379 
+    Password = IamIsRed1ss 
+    DB = 0 
+    [Thumbnail] 
+    MaxWidth = 400 
+    MaxHeight = 300 
+    FileSuffix = ._thumb 
+    MaxTaskCount = -1 
+    EncodeMethod = jpg 
+    GCAfterGen = false 
+    EncodeQuality = 85 
+
+
+
