@@ -5,39 +5,9 @@ metadata:
   name: rustfs-config
   namespace: rustfs
 data:
-  RUSTFS_ADDRESS: ":9000"
   RUSTFS_CONSOLE_ENABLE: "true"
-  RUST_LOG: "error"
-  RUSTFS_OBS_LOG_DIRECTORY: "/var/logs/rustfs/"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rustfs-headless
-  namespace: rustfs
-spec:
-  clusterIP: None
-  publishNotReadyAddresses: true
-  selector:
-    app: rustfs
-  ports:
-  - name: api
-    port: 9000
-    targetPort: 9000
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rustfs
-  namespace: rustfs
-spec:
-  selector:
-    app: rustfs
-  ports:
-  - name: api
-    port: 9000
-    targetPort: 9000
-  type: ClusterIP
+  RUSTFS_VOLUMES: http://rustfs-{0...1}.rustfs-headless.rustfs.svc.cluster.local:9000/data
+  RUSTFS_SERVER_DOMAINS: rustfs.k88936.top
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -97,8 +67,6 @@ spec:
             secretKeyRef:
               name: rustfs-credentials
               key: secretKey
-        - name: RUSTFS_VOLUMES
-          value: http://rustfs-{0...1}.rustfs-headless.rustfs.svc.cluster.local:9000/data
         envFrom:
         - configMapRef:
             name: rustfs-config
@@ -138,3 +106,34 @@ spec:
       resources:
         requests:
           storage: 1024Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rustfs-headless
+  namespace: rustfs
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector:
+    app: rustfs
+  ports:
+  - name: api
+    port: 9000
+    targetPort: 9000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rustfs
+  namespace: rustfs
+spec:
+  selector:
+    app: rustfs
+  ports:
+  - name: api
+    port: 9000
+    targetPort: 9000
+  type: ClusterIP
