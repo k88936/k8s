@@ -70,19 +70,7 @@ spec:
   - websecure
   routes:
   - kind: Rule
-    match: Host(`rustfs.k88936.top`)
-    middlewares:
-    - name: rustfs-buffering
-    - name: rustfs-headers
-    services:
-    - name: rustfs
-      namespace: rustfs
-      port: 9000
-      passHostHeader: true
-      scheme: http
-      serversTransport: rustfs-timeouts
-  - kind: Rule
-    match: HostRegexp(`{bucket:[a-z0-9][a-z0-9.-]+}.rustfs.k88936.top`)
+    match: Host(`rustfs.k88936.top`) || HostRegexp(`.+\.rustfs\.k88936\.top`) # buggy with Traefik's route matcher
     middlewares:
     - name: rustfs-buffering
     - name: rustfs-headers
