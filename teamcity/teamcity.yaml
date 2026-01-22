@@ -20,15 +20,6 @@ spec:
           requests:
             storage: 128Gi
         storageClassName: longhorn
-    - metadata:
-        name: logs
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 16Gi
-        storageClassName: longhorn
   template:
     metadata:
       labels:
@@ -67,25 +58,23 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data/teamcity_server/datadir
-            - name: logs
-              mountPath: /opt/teamcity/logs
           startupProbe:
             tcpSocket:
-              port: 8111
+              port: http
             initialDelaySeconds: 60
             periodSeconds: 15
             failureThreshold: 80
           readinessProbe:
             httpGet:
               path: /healthCheck/healthy
-              port: 8111
+              port: http
             initialDelaySeconds: 60
             periodSeconds: 15
             failureThreshold: 12
           livenessProbe:
             httpGet:
               path: /healthCheck/healthy
-              port: 8111
+              port: http
             initialDelaySeconds: 420
             periodSeconds: 30
             failureThreshold: 5
