@@ -7,7 +7,7 @@ metadata:
 data:
   RUSTFS_CONSOLE_ENABLE: "true"
   RUSTFS_VOLUMES: http://rustfs-{0...1}.rustfs-headless.rustfs.svc.cluster.local:9000/data
-  RUSTFS_SERVER_DOMAINS: rustfs.k88936.top
+  RUSTFS_SERVER_DOMAINS: rustfs.k88936.top,rustfs-0.rustfs-headless.rustfs.svc.cluster.local:9000,rustfs-1.rustfs-headless.rustfs.svc.cluster.local:9000
 ---
 apiVersion: apps/v1
 kind: StatefulSet
