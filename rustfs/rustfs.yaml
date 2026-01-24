@@ -51,7 +51,6 @@ spec:
       containers:
       - name: rustfs
         image: rustfs/rustfs:latest
-        imagePullPolicy: IfNotPresent
         command:
         - /bin/sh
         - -c
@@ -74,13 +73,14 @@ spec:
         - containerPort: 9000
           name: api
         livenessProbe:
-          tcpSocket:
-            port: 9000
+          httpGet:
+            path: /health
+            port: api
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
           tcpSocket:
-            port: 9000
+            port: api
           initialDelaySeconds: 10
           periodSeconds: 10
         resources:
@@ -119,9 +119,9 @@ spec:
   selector:
     app: rustfs
   ports:
-  - name: api
-    port: 9000
-    targetPort: 9000
+  - name: s3
+    port: 80
+    targetPort: api
 
 ---
 apiVersion: v1
@@ -133,7 +133,7 @@ spec:
   selector:
     app: rustfs
   ports:
-  - name: api
-    port: 9000
-    targetPort: 9000
+  - name: s3
+    port: 80
+    targetPort: api
   type: ClusterIP
