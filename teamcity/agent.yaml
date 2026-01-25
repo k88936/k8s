@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: teamcity-agent-config
+  namespace: teamcity
+data:
+  SERVER_URL: "http://teamcity.teamcity:8111"
+  DOCKER_IN_DOCKER: "start"
+  DOCKER_IPTABLES_LEGACY: "1"
+  NO_PROXY: "localhost,127.0.0.1,::1,.local"
+  HTTP_PROXY: "http://wallence.wallence.svc.cluster.local"
+  HTTPS_PROXY: "http://wallence.wallence.svc.cluster.local"
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: teamcity-agent
+  labels:
+    app: teamcity-agent
+  namespace: teamcity
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: teamcity-agent
+  template:
+    metadata:
+      labels:
+        app: teamcity-agent
+    spec:
+      containers:
+        - name: app
+          image: kvtodev/teamcity-agent:latest
+          env:
+            - name: AGENT_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          securityContext:
+            privileged: true
+          envFrom:
+            - configMapRef:
+                name: teamcity-agent-config
+          volumeMounts:
+            - name: cache
+              mountPath: /cache
+              subPath: cache
+            - name: cache
+              mountPath: /var/lib/docker
+              subPath: docker
+            - name: cache
+              mountPath: /root/.gradle
+              subPath: gradle
+            - name: cache
+              mountPath: /root/.m2
+              subPath: m2
+  volumeClaimTemplates:
+    - metadata:
+        name: cache
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: openebs-hostpath
+        resources:
+          requests:
+            storage: 128Gi
