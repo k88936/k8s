@@ -35,8 +35,6 @@ spec:
           mountPath: /opt/youtrack/data
         - name: conf
           mountPath: /opt/youtrack/conf
-        - name: logs
-          mountPath: /opt/youtrack/logs
         - name: backups
           mountPath: /opt/youtrack/backups
   volumeClaimTemplates:
@@ -56,14 +54,6 @@ spec:
       resources:
         requests:
           storage: 2Gi
-  - metadata:
-      name: logs
-    spec:
-      accessModes: ["ReadWriteOnce"]
-      storageClassName: longhorn
-      resources:
-        requests:
-          storage: 5Gi
   - metadata:
       name: backups
     spec:
