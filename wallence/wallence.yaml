@@ -60,6 +60,6 @@ spec:
     app: wallence
   ports:
   - name: proxy
-    port: 80
+    port: 7890
     targetPort: proxy
   type: ClusterIP

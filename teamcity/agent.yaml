@@ -8,8 +8,26 @@ data:
   DOCKER_IN_DOCKER: "start"
   DOCKER_IPTABLES_LEGACY: "1"
   NO_PROXY: "localhost,127.0.0.1,::1,.local"
-  HTTP_PROXY: "http://wallence.wallence.svc.cluster.local"
-  HTTPS_PROXY: "http://wallence.wallence.svc.cluster.local"
+  HTTP_PROXY: "http://wallence.wallence.svc.cluster.local:7890"
+  HTTPS_PROXY: "http://wallence.wallence.svc.cluster.local:7890"
+  HTTPS_PROXY: "http://wallence.wallence.svc.cluster.local:7890"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: teamcity-agent-headless
+  namespace: teamcity
+  labels:
+    app: teamcity-agent
+spec:
+  clusterIP: None
+  selector:
+    app: teamcity-agent
+  ports:
+    - name: agent
+      port: 9090
+      targetPort: 9090
+
 
 ---
 apiVersion: apps/v1
@@ -21,6 +39,7 @@ metadata:
   namespace: teamcity
 spec:
   replicas: 1
+  serviceName: teamcity-agent-headless
   selector:
     matchLabels:
       app: teamcity-agent
@@ -34,9 +53,6 @@ spec:
           image: kvtodev/teamcity-agent:latest
           env:
             - name: AGENT_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
           securityContext:
             privileged: true
           envFrom:
