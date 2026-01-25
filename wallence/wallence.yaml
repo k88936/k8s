@@ -1,0 +1,65 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wallence-config
+  namespace: wallence
+data:
+  DIRECT_DOMAINS: "k88936.top,tsinghua.edu.cn"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wallence
+  namespace: wallence
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: wallence
+  template:
+    metadata:
+      labels:
+        app: wallence
+    spec:
+      containers:
+      - name: wallence
+        image: kvtodev/wallence:latest
+        env:
+        - name: SUBSCRIPTIONS
+          valueFrom:
+            secretKeyRef:
+              name: wallence-subscriptions
+              key: subscriptions
+        envFrom:
+        - configMapRef:
+            name: wallence-config
+        ports:
+        - containerPort: 7890
+          name: proxy
+        # readinessProbe:
+        #   tcpSocket:
+        #     port: proxy
+        #   initialDelaySeconds: 60
+        #   periodSeconds: 10
+        # livenessProbe:
+        #   tcpSocket:
+        #     port: proxy
+        #   initialDelaySeconds: 60
+        #   periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wallence
+  namespace: wallence
+spec:
+  selector:
+    app: wallence
+  ports:
+  - name: proxy
+    port: 80
+    targetPort: proxy
+  type: ClusterIP

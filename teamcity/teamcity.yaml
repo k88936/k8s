@@ -38,7 +38,6 @@ spec:
       containers:
         - name: teamcity-server
           image: jetbrains/teamcity-server:latest
-          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8111
               name: http
