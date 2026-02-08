@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nextcloud-config
+  namespace: nextcloud
+data:
+  POSTGRES_HOST: nextcloud-postgres
+  POSTGRES_DB: nextcloud
+  POSTGRES_USER: nextcloud
+  POSTGRES_PASSWORD: nextcloud
+  POSTGRES_PORT: "5432"
+  NEXTCLOUD_TRUSTED_DOMAINS: nextcloud.k88936.top
+  OBJECTSTORE_S3_BUCKET: ""
+  OBJECTSTORE_S3_HOST: ""
+  OBJECTSTORE_S3_USEPATH_STYLE: "true"
+  OBJECTSTORE_S3_AUTOCREATE: "true"
