@@ -18,7 +18,7 @@ spec:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 16Gi
+            storage: 4Gi
         storageClassName: longhorn
   template:
     metadata:
@@ -40,13 +40,6 @@ spec:
           ports:
             - containerPort: 5432
               name: postgres
-          resources:
-            requests:
-              cpu: 250m
-              memory: 512Mi
-            limits:
-              cpu: "1"
-              memory: 1Gi
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data

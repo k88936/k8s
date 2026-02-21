@@ -4,7 +4,7 @@ metadata:
   name: longhorn-oss
 provisioner: driver.longhorn.io
 allowVolumeExpansion: false
-reclaimPolicy: Delete
+reclaimPolicy: Retain
 volumeBindingMode: WaitForFirstConsumer
 parameters:
   backupTargetName: "default"
@@ -12,12 +12,13 @@ parameters:
   staleReplicaTimeout: "2880"
   fromBackup: ""
   fsType: "xfs"
-  migratable: false
-  encrypted: false
+  migratable: "false"
+  encrypted: "false"
   dataLocality: "strict-local"
   replicaAutoBalance: "best-effort"
   diskSelector: "storage"
   replicaDiskSoftAntiAffinity: "enabled"
+
 ---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
@@ -33,4 +34,4 @@ parameters:
   staleReplicaTimeout: "2880"
   fsType: "ext4"
   dataLocality: "strict-local"
-  diskSelector: "storage,fast"
+  diskSelector: "fast"

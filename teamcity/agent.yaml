@@ -38,7 +38,7 @@ metadata:
     app: teamcity-agent
   namespace: teamcity
 spec:
-  replicas: 1
+  replicas: 2
   serviceName: teamcity-agent-headless
   selector:
     matchLabels:
@@ -71,12 +71,22 @@ spec:
             - name: cache
               mountPath: /root/.m2
               subPath: m2
+            - name: conf
+              mountPath: /data/teamcity_agent/conf
   volumeClaimTemplates:
     - metadata:
         name: cache
       spec:
         accessModes: ["ReadWriteOnce"]
-        storageClassName: openebs-hostpath
+        storageClassName: longhorn-cache
         resources:
           requests:
             storage: 128Gi
+    - metadata:
+        name: conf
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: longhorn
+        resources:
+          requests:
+            storage: 128Mi

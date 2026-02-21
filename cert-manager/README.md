@@ -2,10 +2,9 @@
 ```shell
 helm install \
     cert-manager oci://quay.io/jetstack/charts/cert-manager \
-    --version v1.19.2 \
     --namespace cert-manager \
     --create-namespace \
-    --set crds.enabled=true
+    --set crds.enabled=true \
     --set 'extraArgs={--dns01-recursive-nameservers-only,--dns01-recursive-nameservers=8.8.8.8:53\,1.1.1.1:53}'
 ```
 
@@ -24,5 +23,6 @@ kubectl create secret generic alidns-secret \
 ```
 
 ```shell
-kubectl apply -f issuer.yaml cert.yaml
+kubectl apply -f issuer.yaml 
+kubectl apply -f cert.yaml
 ```

@@ -22,7 +22,7 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
       - name: youtrack
-        image: jetbrains/youtrack:2025.3.117635
+        image: jetbrains/youtrack:2025.3.124603
         imagePullPolicy: IfNotPresent
         env:
         - name: YOUTRACK_BASE_URL
@@ -45,7 +45,7 @@ spec:
       storageClassName: longhorn
       resources:
         requests:
-          storage: 20Gi
+          storage: 64Gi
   - metadata:
       name: conf
     spec:
@@ -53,7 +53,7 @@ spec:
       storageClassName: longhorn
       resources:
         requests:
-          storage: 2Gi
+          storage: 128Mi
   - metadata:
       name: backups
     spec:
@@ -61,7 +61,7 @@ spec:
       storageClassName: longhorn
       resources:
         requests:
-          storage: 20Gi
+          storage: 4Gi
 ---
 apiVersion: v1
 kind: Service

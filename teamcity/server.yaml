@@ -18,7 +18,7 @@ spec:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 128Gi
+            storage: 16Gi
         storageClassName: longhorn
   template:
     metadata:
@@ -47,13 +47,6 @@ spec:
           env:
             - name: TEAMCITY_SERVER_MEM_OPTS
               value: "-Xms512m -Xmx2g"
-          resources:
-            requests:
-              cpu: 500m
-              memory: 1Gi
-            limits:
-              cpu: "2"
-              memory: 4Gi
           volumeMounts:
             - name: data
               mountPath: /data/teamcity_server/datadir

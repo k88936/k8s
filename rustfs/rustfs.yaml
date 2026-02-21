@@ -6,8 +6,9 @@ metadata:
   namespace: rustfs
 data:
   RUSTFS_CONSOLE_ENABLE: "true"
-  RUSTFS_VOLUMES: http://rustfs-{0...1}.rustfs-headless.rustfs.svc.cluster.local:9000/data
-  RUSTFS_SERVER_DOMAINS: rustfs.k88936.top,rustfs-0.rustfs-headless.rustfs.svc.cluster.local:9000,rustfs-1.rustfs-headless.rustfs.svc.cluster.local:9000
+  RUSTFS_VOLUMES: /data
+  # RUSTFS_VOLUMES: http://rustfs-{0...1}.rustfs-headless.rustfs.svc.cluster.local:9000/data
+  # RUSTFS_SERVER_DOMAINS: rustfs.k88936.top,rustfs-0.rustfs-headless.rustfs.svc.cluster.local:9000,rustfs-1.rustfs-headless.rustfs.svc.cluster.local:9000
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -16,7 +17,7 @@ metadata:
   namespace: rustfs
 spec:
   podManagementPolicy: Parallel
-  replicas: 2
+  replicas: 1
   serviceName: rustfs-headless
   selector:
     matchLabels:
@@ -83,13 +84,6 @@ spec:
             port: api
           initialDelaySeconds: 10
           periodSeconds: 10
-        resources:
-          requests:
-            cpu: "2"
-            memory: 1Gi
-          limits:
-            cpu: "2"
-            memory: 2Gi
         volumeMounts:
         - name: data
           mountPath: /data
@@ -100,12 +94,12 @@ spec:
   - metadata:
       name: data
     spec:
-      storageClassName: openebs-hostpath
+      storageClassName: longhorn-oss
       accessModes:
       - ReadWriteOnce
       resources:
         requests:
-          storage: 1024Gi
+          storage: 256Gi
 
 ---
 apiVersion: v1
