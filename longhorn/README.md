@@ -2,7 +2,7 @@
 ```shell
 modprobe dm-crypt
 echo dm_crypt | sudo tee /etc/modules-load.d/dm_crypt.conf
-pacman -S device-manager cryptsetup nfs-utils open-iscsi
+pacman -S cryptsetup nfs-utils open-iscsi
 systemctl enable iscsid
 systemctl start iscsid
 
