@@ -37,21 +37,11 @@ spec:
             - name: postgres
               containerPort: 5432
           env:
-            - name: POSTGRES_DB
-              valueFrom:
-                secretKeyRef:
-                  name: nextcloud-db-secret
-                  key: POSTGRES_DB
-            - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  name: nextcloud-db-secret
-                  key: POSTGRES_USER
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: nextcloud-db-secret
-                  key: POSTGRES_PASSWORD
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          envFrom:
+            - secretRef:
+                name: nextcloud-db-secret
           volumeMounts:
             - name: pgdata
               mountPath: /var/lib/postgresql/data
@@ -63,4 +53,4 @@ spec:
         resources:
           requests:
             storage: 16Gi
----
+        storageClassName: longhorn

@@ -28,19 +28,12 @@ spec:
       securityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
-      initContainers:
-        - name: wait-for-db
-          image: busybox:1.37.0
-          command:
-            - sh
-            - -c
-            - until nc -z teamcity-postgres 5432; do echo "waiting for postgres"; sleep 3; done
       containers:
         - name: teamcity-server
           image: jetbrains/teamcity-server:latest
           ports:
             - containerPort: 8111
-              name: http
+              name: container-port
           envFrom:
             - secretRef:
                 name: teamcity-db-secret
@@ -52,21 +45,21 @@ spec:
               mountPath: /data/teamcity_server/datadir
           startupProbe:
             tcpSocket:
-              port: http
+              port: container-port
             initialDelaySeconds: 60
             periodSeconds: 15
             failureThreshold: 80
           readinessProbe:
             httpGet:
               path: /healthCheck/healthy
-              port: http
+              port: container-port
             initialDelaySeconds: 60
             periodSeconds: 15
             failureThreshold: 12
           livenessProbe:
             httpGet:
               path: /healthCheck/healthy
-              port: http
+              port: container-port
             initialDelaySeconds: 420
             periodSeconds: 30
             failureThreshold: 5
@@ -81,7 +74,7 @@ spec:
   selector:
     app: teamcity
   ports:
-    - name: http
+    - name: service-port
       port: 8111
-      targetPort: http
+      targetPort: container-port
   type: ClusterIP

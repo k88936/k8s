@@ -77,7 +77,7 @@ spec:
     services:
     - name: rustfs
       namespace: rustfs
-      port: s3
+      port: api
       passHostHeader: true
       scheme: http
       serversTransport: rustfs-timeouts

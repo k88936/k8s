@@ -1,7 +1,6 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  namespace: teamcity  # namespace where the pvc's exist
   name: volume-migration
 spec:
   completions: 1
@@ -19,17 +18,18 @@ spec:
           image: alpine:3.19
           tty: true
           command: [ "/bin/sh" ]
-          # Install rsync then run the copy
-          args: [ "-c", "apk add --no-cache rsync && rsync -av --delete --progress /mnt/old/ /mnt/new" ]
+          args: [ "-c", "apk add --no-cache rsync && rsync -av --delete --progress /mnt/src/ /mnt/dst/" ]
           volumeMounts:
-            - name: old-vol
-              mountPath: /mnt/old
-            - name: new-vol
-              mountPath: /mnt/new
+            - name: src
+              mountPath: /mnt/src
+            - name: dst
+              mountPath: /mnt/dst
       volumes:
-        - name: old-vol
-          hostPath:
-            path: /mnt/tmp
-        - name: new-vol
+        - name: src
           persistentVolumeClaim:
-            claimName:  data-teamcity-0 # change to data target pvc
+            claimName:  data-rustfs-0
+          # hostPath:
+          #   path: /mnt/tmp
+        - name: dst
+          persistentVolumeClaim:
+            claimName:  data-rustfs-1

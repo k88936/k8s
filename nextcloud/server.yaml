@@ -1,19 +1,4 @@
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: nextcloud
-  namespace: nextcloud
-  labels:
-    app: nextcloud
-spec:
-  ports:
-    - name: http
-      port: 80
-      targetPort: 80
-  selector:
-    app: nextcloud
----
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -35,15 +20,15 @@ spec:
           image: nextcloud:apache
           imagePullPolicy: IfNotPresent
           ports:
-            - name: http
+            - name: container-port
               containerPort: 80
           envFrom:
             - configMapRef:
                 name: nextcloud-config
             - secretRef:
-                name: nextcloud-db-secret
-            - secretRef:
                 name: nextcloud-s3-secret
+            - secretRef:
+                name: nextcloud-db-secret
           env:
             - name: OVERWRITEHOST
               value: nextcloud.k88936.top
@@ -52,13 +37,6 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/www/html
-          resources:
-            requests:
-              cpu: 100m
-              memory: 512Mi
-            limits:
-              cpu: 1000m
-              memory: 2Gi
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -66,29 +44,20 @@ spec:
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: 16Gi
+            storage: 32Gi
+
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: v1
+kind: Service
 metadata:
   name: nextcloud
   namespace: nextcloud
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt
+  labels:
+    app: nextcloud
 spec:
-  ingressClassName: traefik
-  tls:
-    - secretName: nextcloud-tls
-      hosts:
-        - nextcloud.k88936.top
-  rules:
-    - host: nextcloud.k88936.top
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: nextcloud
-                port:
-                  number: 80
+  ports:
+    - name: service-port
+      port: 80
+      targetPort: container-port
+  selector:
+    app: nextcloud

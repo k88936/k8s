@@ -5,10 +5,11 @@ metadata:
   name: rustfs-config
   namespace: rustfs
 data:
+  # RUST_LOG: debug
   RUSTFS_CONSOLE_ENABLE: "true"
   RUSTFS_VOLUMES: /data
   # RUSTFS_VOLUMES: http://rustfs-{0...1}.rustfs-headless.rustfs.svc.cluster.local:9000/data
-  # RUSTFS_SERVER_DOMAINS: rustfs.k88936.top,rustfs-0.rustfs-headless.rustfs.svc.cluster.local:9000,rustfs-1.rustfs-headless.rustfs.svc.cluster.local:9000
+  RUSTFS_SERVER_DOMAINS: rustfs.k88936.top,rustfs-0.rustfs-headless.rustfs.svc.cluster.local:9000,rustfs-1.rustfs-headless.rustfs.svc.cluster.local:9000
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -72,16 +73,16 @@ spec:
             name: rustfs-config
         ports:
         - containerPort: 9000
-          name: api
+          name: container-port
         livenessProbe:
           httpGet:
             path: /health
-            port: api
+            port: container-port
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
           tcpSocket:
-            port: api
+            port: container-port
           initialDelaySeconds: 10
           periodSeconds: 10
         volumeMounts:
@@ -112,11 +113,6 @@ spec:
   publishNotReadyAddresses: true
   selector:
     app: rustfs
-  ports:
-  - name: s3
-    port: 80
-    targetPort: api
-
 ---
 apiVersion: v1
 kind: Service
@@ -127,7 +123,7 @@ spec:
   selector:
     app: rustfs
   ports:
-  - name: s3
+  - name: api
     port: 80
-    targetPort: api
+    targetPort: container-port
   type: ClusterIP
