@@ -28,7 +28,7 @@ spec:
         - name: YOUTRACK_BASE_URL
           value: https://youtrack.k88936.top
         ports:
-        - name: http
+        - name: container-port
           containerPort: 8080
         volumeMounts:
         - name: data
@@ -75,6 +75,6 @@ spec:
   selector:
     app: youtrack
   ports:
-  - name: http
+  - name: service-port
     port: 80
-    targetPort: http
+    targetPort: container-port

@@ -22,6 +22,7 @@ spec:
           ports:
             - name: container-port
               containerPort: 80
+          args: ["sh", "-c", "/cron.sh & exec apache2-foreground"]
           envFrom:
             - configMapRef:
                 name: nextcloud-config

@@ -12,6 +12,29 @@ spec:
     name: letsencrypt
     kind: ClusterIssuer
 ---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: nextcloud-security-headers
+  namespace: nextcloud
+spec:
+  headers:
+    stsSeconds: 15552000
+    stsIncludeSubdomains: true
+    stsPreload: true
+    forceSTSHeader: true
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: nextcloud-wellknown-redirect
+  namespace: nextcloud
+spec:
+  redirectRegex:
+    regex: ^https://([^/]+)/\.well-known/(?:card|cal)dav$
+    replacement: https://${1}/remote.php/dav/
+    permanent: true
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -19,6 +42,7 @@ metadata:
   namespace: nextcloud
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
+    traefik.ingress.kubernetes.io/router.middlewares: nextcloud-nextcloud-wellknown-redirect@kubernetescrd,nextcloud-nextcloud-security-headers@kubernetescrd
 spec:
   ingressClassName: traefik
   tls:

@@ -32,4 +32,4 @@ spec:
           service:
             name: youtrack
             port:
-              name: http
+              name: service-port
