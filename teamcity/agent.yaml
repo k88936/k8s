@@ -65,12 +65,6 @@ spec:
             - name: cache
               mountPath: /var/lib/docker
               subPath: docker
-            - name: cache
-              mountPath: /root/.gradle
-              subPath: gradle
-            - name: cache
-              mountPath: /root/.m2
-              subPath: m2
             - name: conf
               mountPath: /data/teamcity_agent/conf
   volumeClaimTemplates:
