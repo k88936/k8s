@@ -1,24 +1,3 @@
-kind: StorageClass
-apiVersion: storage.k8s.io/v1
-metadata:
-  name: longhorn-oss
-provisioner: driver.longhorn.io
-allowVolumeExpansion: false
-reclaimPolicy: Retain
-volumeBindingMode: WaitForFirstConsumer
-parameters:
-  backupTargetName: "default"
-  numberOfReplicas: "1"
-  staleReplicaTimeout: "2880"
-  fromBackup: ""
-  fsType: "xfs"
-  migratable: "false"
-  encrypted: "false"
-  dataLocality: "strict-local"
-  replicaAutoBalance: "best-effort"
-  diskSelector: "storage"
-  replicaDiskSoftAntiAffinity: "enabled"
-
 ---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1

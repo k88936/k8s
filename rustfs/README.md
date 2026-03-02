@@ -5,3 +5,4 @@ kubectl create secret generic rustfs-credentials \
   --from-literal=accessKey=rustfsadmin \
   --from-literal=secretKey=rustfsadmin
 ```
+

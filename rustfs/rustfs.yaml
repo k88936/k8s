@@ -5,11 +5,9 @@ metadata:
   name: rustfs-config
   namespace: rustfs
 data:
-  # RUST_LOG: debug
   RUSTFS_CONSOLE_ENABLE: "true"
-  RUSTFS_VOLUMES: /data
-  # RUSTFS_VOLUMES: http://rustfs-{0...1}.rustfs-headless.rustfs.svc.cluster.local:9000/data
-  RUSTFS_SERVER_DOMAINS: rustfs.k88936.top,rustfs-0.rustfs-headless.rustfs.svc.cluster.local:9000,rustfs-1.rustfs-headless.rustfs.svc.cluster.local:9000
+  # RUSTFS_VOLUMES: /data
+  RUSTFS_VOLUMES: http://rustfs-{0...3}.rustfs-headless.rustfs.svc.cluster.local:9000/data
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -18,7 +16,7 @@ metadata:
   namespace: rustfs
 spec:
   podManagementPolicy: Parallel
-  replicas: 1
+  replicas: 4
   serviceName: rustfs-headless
   selector:
     matchLabels:
@@ -78,41 +76,58 @@ spec:
           httpGet:
             path: /health
             port: container-port
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          tcpSocket:
-            port: container-port
           initialDelaySeconds: 10
-          periodSeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: container-port
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 3
         volumeMounts:
         - name: data
           mountPath: /data
-      volumes:
-      - name: rustfs-logs
-        emptyDir: {}
   volumeClaimTemplates:
   - metadata:
       name: data
     spec:
-      storageClassName: longhorn-oss
+      storageClassName: longhorn-rustfs
       accessModes:
       - ReadWriteOnce
       resources:
         requests:
           storage: 256Gi
-
 ---
-apiVersion: v1
-kind: Service
+
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
 metadata:
-  name: rustfs-headless
-  namespace: rustfs
-spec:
-  clusterIP: None
-  publishNotReadyAddresses: true
-  selector:
-    app: rustfs
+  name: longhorn-rustfs
+provisioner: driver.longhorn.io
+allowVolumeExpansion: true
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer
+parameters:
+  backupTargetName: "default"
+  numberOfReplicas: "1"
+  staleReplicaTimeout: "2880"
+  fromBackup: ""
+  fsType: "xfs"
+  mkfsParam: "-i size=512 -n ftype=1 -d su=256k,sw=10"
+  migratable: "false"
+  encrypted: "false"
+  dataLocality: "strict-local"
+  replicaAutoBalance: "best-effort"
+  diskSelector: "storage"
+  replicaDiskSoftAntiAffinity: "enabled"
+
+
 ---
 apiVersion: v1
 kind: Service
@@ -127,3 +142,15 @@ spec:
     port: 80
     targetPort: container-port
   type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rustfs-headless
+  namespace: rustfs
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector:
+    app: rustfs

@@ -1,0 +1,38 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: cloudreve-k88936-top
+  namespace: cloudreve
+spec:
+  secretName: cloudreve-tls
+  dnsNames:
+    - cloudreve.k88936.top
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cloudreve
+  namespace: cloudreve
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  ingressClassName: traefik
+  tls:
+    - secretName: cloudreve-tls
+      hosts:
+        - cloudreve.k88936.top
+  rules:
+    - host: cloudreve.k88936.top
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cloudreve
+                port:
+                  name: service-port

@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: nextcloud
-          image: nextcloud:apache
+          image: kvtodev/nextcloud:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: container-port

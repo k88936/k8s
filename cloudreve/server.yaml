@@ -1,0 +1,80 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cloudreve
+  namespace: cloudreve
+spec:
+  serviceName: cloudreve
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloudreve
+  template:
+    metadata:
+      labels:
+        app: cloudreve
+    spec:
+      containers:
+        - name: cloudreve
+          image: cloudreve/cloudreve:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: container-port
+              containerPort: 5212
+          envFrom:
+            - secretRef:
+                name: cloudreve-secret
+          volumeMounts:
+            - name: uploads
+              mountPath: /cloudreve/uploads
+            - name: config
+              mountPath: /cloudreve/conf.ini
+              subPath: conf.ini
+            - name: db
+              mountPath: /cloudreve/cloudreve.db
+              subPath: cloudreve.db
+            - name: avatar
+              mountPath: /cloudreve/avatar
+      volumes:
+        - name: config
+          configMap:
+            name: cloudreve-config
+        - name: db
+          persistentVolumeClaim:
+            claimName: cloudreve-db
+        - name: avatar
+          persistentVolumeClaim:
+            claimName: cloudreve-avatar
+  volumeClaimTemplates:
+    - metadata:
+        name: uploads
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 32Gi
+        storageClassName: longhorn
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 16Gi
+        storageClassName: longhorn
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloudreve
+  namespace: cloudreve
+  labels:
+    app: cloudreve
+spec:
+  ports:
+    - name: service-port
+      port: 80
+      targetPort: container-port
+  selector:
+    app: cloudreve
