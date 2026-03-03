@@ -6,7 +6,6 @@ metadata:
   namespace: rustfs
 data:
   RUSTFS_CONSOLE_ENABLE: "true"
-  # RUSTFS_VOLUMES: /data
   RUSTFS_VOLUMES: http://rustfs-{0...3}.rustfs-headless.rustfs.svc.cluster.local:9000/data
 ---
 apiVersion: apps/v1
@@ -50,7 +49,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
       containers:
       - name: rustfs
-        image: rustfs/rustfs:latest
+        image: rustfs/rustfs:1.0.0-alpha.85
         command:
         - /bin/sh
         - -c
@@ -83,7 +82,7 @@ spec:
           failureThreshold: 3
         readinessProbe:
           httpGet:
-            path: /health/ready
+            path: /health
             port: container-port
           initialDelaySeconds: 30
           periodSeconds: 5
@@ -97,37 +96,12 @@ spec:
   - metadata:
       name: data
     spec:
-      storageClassName: longhorn-rustfs
+      storageClassName: local-path
       accessModes:
       - ReadWriteOnce
       resources:
         requests:
-          storage: 256Gi
----
-
-kind: StorageClass
-apiVersion: storage.k8s.io/v1
-metadata:
-  name: longhorn-rustfs
-provisioner: driver.longhorn.io
-allowVolumeExpansion: true
-reclaimPolicy: Retain
-volumeBindingMode: WaitForFirstConsumer
-parameters:
-  backupTargetName: "default"
-  numberOfReplicas: "1"
-  staleReplicaTimeout: "2880"
-  fromBackup: ""
-  fsType: "xfs"
-  mkfsParam: "-i size=512 -n ftype=1 -d su=256k,sw=10"
-  migratable: "false"
-  encrypted: "false"
-  dataLocality: "strict-local"
-  replicaAutoBalance: "best-effort"
-  diskSelector: "storage"
-  replicaDiskSoftAntiAffinity: "enabled"
-
-
+          storage: 64Gi
 ---
 apiVersion: v1
 kind: Service
