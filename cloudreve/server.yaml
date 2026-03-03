@@ -22,9 +22,6 @@ spec:
           ports:
             - name: container-port
               containerPort: 5212
-          envFrom:
-            - secretRef:
-                name: cloudreve-secret
           volumeMounts:
             - name: uploads
               mountPath: /cloudreve/uploads
@@ -40,12 +37,6 @@ spec:
         - name: config
           configMap:
             name: cloudreve-config
-        - name: db
-          persistentVolumeClaim:
-            claimName: cloudreve-db
-        - name: avatar
-          persistentVolumeClaim:
-            claimName: cloudreve-avatar
   volumeClaimTemplates:
     - metadata:
         name: uploads
@@ -53,16 +44,26 @@ spec:
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: 32Gi
-        storageClassName: longhorn
+            storage: 64Gi
+        storageClassName: local-path
     - metadata:
-        name: data
+        name: db
       spec:
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: 16Gi
+            storage: 32Gi
         storageClassName: longhorn
+    - metadata:
+        name: avatar
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 4Gi
+        storageClassName: longhorn
+
+
 ---
 apiVersion: v1
 kind: Service
