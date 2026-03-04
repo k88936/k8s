@@ -106,21 +106,20 @@ data:
   config.json: |-
     {
       "nodePathMap":[
-                      {
-                        "node":"DEFAULT_PATH_FOR_NON_LISTED_NODES",
-                        "paths":[
-                          "/mnt/boom0/local-path",
-                          "/mnt/boom1/local-path", 
-                          "/mnt/boom2/local-path", 
-                          
-                          "/mnt/storage0/local-path"
-
-                          ]
-                },
-                {
-                        "node":"k88936-t480",
-                        "paths":[]
-                }
+        {
+          "node":"DEFAULT_PATH_FOR_NON_LISTED_NODES",
+          "paths":[
+            "/mnt/boom0/local-path",
+            "/mnt/boom1/local-path", 
+            "/mnt/boom2/local-path", 
+            
+            "/mnt/storage0/local-path"
+            ]
+        },
+        {
+          "node":"k88936-t480",
+          "paths":[]
+        }
       ]
     }
   setup: |-
