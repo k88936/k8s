@@ -33,7 +33,7 @@ spec:
         resources:
           requests:
             storage: 64Gi
-        storageClassName: local-path
+        storageClassName: longhorn
 ---
 apiVersion: v1
 kind: Service
