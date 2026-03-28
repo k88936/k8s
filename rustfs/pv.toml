@@ -1,0 +1,8 @@
+
+[rustfs]
+name= "rustfs-data"
+namespace = "rustfs"
+labels = { type = "rustfs-data" }
+capacity = "512Gi"
+path = ["k88936-sa5212m4:/mnt/boom1/","k88936-sa5212m4:/mnt/boom2/","k88936-sa5212m4:/mnt/storage0/","k88936-sa5212m4:/mnt/storage1/"]
+output = "rustfs/pv/"

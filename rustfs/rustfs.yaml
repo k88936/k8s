@@ -15,7 +15,7 @@ metadata:
   namespace: rustfs
 spec:
   podManagementPolicy: Parallel
-  replicas: 4
+  replicas: 1
   serviceName: rustfs-headless
   selector:
     matchLabels:
@@ -28,22 +28,6 @@ spec:
         app: rustfs
     spec:
       terminationGracePeriodSeconds: 120
-      # topologySpreadConstraints:
-      # - maxSkew: 1
-      #   topologyKey: kubernetes.io/hostname
-      #   whenUnsatisfiable: DoNotSchedule
-      #   labelSelector:
-      #     matchLabels:
-      #       app: rustfs
-      # affinity:
-      #   podAntiAffinity:
-      #     preferredDuringSchedulingIgnoredDuringExecution:
-      #     - weight: 100
-      #       podAffinityTerm:
-      #         topologyKey: kubernetes.io/hostname
-      #         labelSelector:
-      #           matchLabels:
-      #             app: rustfs
       securityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
@@ -97,12 +81,15 @@ spec:
   - metadata:
       name: data
     spec:
-      storageClassName: local-path
+      storageClassName: local-storage
       accessModes:
       - ReadWriteOnce
       resources:
         requests:
           storage: 64Gi
+      selector:
+        matchLabels:
+          type: rustfs-data
 ---
 apiVersion: v1
 kind: Service

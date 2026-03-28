@@ -18,7 +18,7 @@ spec:
       containers:
         - name: cloudreve
           image: cloudreve/cloudreve:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - name: container-port
               containerPort: 5212

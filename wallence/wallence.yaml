@@ -26,6 +26,7 @@ spec:
       containers:
       - name: wallence
         image: kvtodev/wallence:latest
+        imagePullPolicy: Always
         env:
         - name: SUBSCRIPTIONS
           valueFrom:
