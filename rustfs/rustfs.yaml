@@ -50,6 +50,7 @@ spec:
       containers:
       - name: rustfs
         image: rustfs/rustfs:latest
+        imagePullPolicy: Always
         command:
         - /bin/sh
         - -c
