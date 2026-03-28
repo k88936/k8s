@@ -108,6 +108,10 @@ data:
       "nodePathMap":[
         {
           "node":"DEFAULT_PATH_FOR_NON_LISTED_NODES",
+          "paths":[]
+        },
+        {
+          "node":"k88936.top",
           "paths":[
             "/mnt/boom0/local-path",
             "/mnt/boom1/local-path", 
@@ -116,10 +120,6 @@ data:
             "/mnt/storage0/local-path",
             "/mnt/storage1/local-path"
             ]
-        },
-        {
-          "node":"k88936-t480",
-          "paths":[]
         }
       ]
     }
