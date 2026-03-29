@@ -15,7 +15,7 @@ metadata:
   namespace: rustfs
 spec:
   podManagementPolicy: Parallel
-  replicas: 1
+  replicas: 4
   serviceName: rustfs-headless
   selector:
     matchLabels:
@@ -86,7 +86,7 @@ spec:
       - ReadWriteOnce
       resources:
         requests:
-          storage: 64Gi
+          storage: 512Gi
       selector:
         matchLabels:
           type: rustfs-data

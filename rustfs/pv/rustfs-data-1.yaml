@@ -14,7 +14,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
   local:
-    path: /mnt/boom2/rustfs-data-8e801221
+    path: /mnt/boom0/rustfs-data-8e801221
   nodeAffinity:
     required:
       nodeSelectorTerms:
