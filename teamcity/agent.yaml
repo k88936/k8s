@@ -63,8 +63,8 @@ spec:
               mountPath: /cache
               subPath: cache
             - name: cache
-              mountPath: /var/lib/docker
-              subPath: docker
+              mountPath: /var/lib/containers
+              subPath: podman
             - name: conf
               mountPath: /data/teamcity_agent/conf
   volumeClaimTemplates:
