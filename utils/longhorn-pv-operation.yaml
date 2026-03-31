@@ -1,0 +1,23 @@
+apiVersion: v1
+ kind: Pod
+ metadata:
+   name: postgres-restore
+   namespace: teamcity
+ spec:
+   containers:
+     - name: restore
+       image: busybox:latest
+       volumeMounts:
+         - name: pgdata-pvc          # Mount the PVC
+           mountPath: /mnt/pvc
+         - name: backup-data         # Mount host backup data
+           mountPath: /mnt/backup
+   volumes:
+     - name: pgdata-pvc
+       persistentVolumeClaim:
+         claimName: data-teamcity-postgres-0
+     - name: backup-data
+       hostPath:
+         path: /mnt/storage1/pgdata  # Your backup location
+   nodeSelector:
+     kubernetes.io/hostname: k88936-sa5212m4  # Pin to host with backup
