@@ -3,5 +3,5 @@ name= "cache-teamcity-agent"
 namespace = "teamcity"
 labels = { type = "teamcity-agent-cache" }
 capacity = "128Gi"
-path = ["k88936-sa5212m4:/mnt/boom1/","k88936-sa5212m4:/mnt/boom1/"]
+path = ["k88936-sa5212m4:/mnt/boom1/","k88936-sa5212m4:/mnt/boom1/","k88936-sa5212m4:/mnt/boom2/"]
 output = "teamcity/pv/"

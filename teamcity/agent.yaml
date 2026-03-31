@@ -5,8 +5,6 @@ metadata:
   namespace: teamcity
 data:
   SERVER_URL: "http://teamcity.teamcity:8111"
-  DOCKER_IN_DOCKER: "start"
-  DOCKER_IPTABLES_LEGACY: "1"
   NO_PROXY: "localhost,127.0.0.1,::1,.local"
   HTTP_PROXY: "http://wallence.wallence.svc.cluster.local:7890"
   HTTPS_PROXY: "http://wallence.wallence.svc.cluster.local:7890"
@@ -50,8 +48,6 @@ spec:
         - name: app
           image: kvtodev/teamcity-agent:latest
           imagePullPolicy: Always
-          env:
-            - name: AGENT_NAME
           securityContext:
             privileged: true
           envFrom:
@@ -65,7 +61,7 @@ spec:
               mountPath: /var/lib/containers
               subPath: podman
             - name: conf
-              mountPath: /data/teamcity_agent/conf
+              mountPath: /data/conf
   volumeClaimTemplates:
     - metadata:
         name: cache
