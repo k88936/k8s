@@ -22,7 +22,7 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
       - name: youtrack
-        image: jetbrains/youtrack:2025.3.132953
+        image: jetbrains/youtrack:2026.1.12135
         imagePullPolicy: Always
         env:
         - name: YOUTRACK_BASE_URL
