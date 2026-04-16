@@ -40,7 +40,7 @@ spec:
                 name: teamcity-db-secret
           env:
             - name: TEAMCITY_SERVER_MEM_OPTS
-              value: "-Xms512m -Xmx2g"
+              value: "-Xms512m -Xmx4g"
           volumeMounts:
             - name: data
               mountPath: /data/teamcity_server/datadir
