@@ -8,5 +8,5 @@ systemctl start iscsid
 
 helm repo add longhorn https://charts.longhorn.io
 helm repo update
-helm upgrade longhorn longhorn/longhorn --namespace longhorn-system --reset-values --version 1.11.1
+helm upgrade longhorn longhorn/longhorn --namespace longhorn-system --reset-values --version 1.12.0
 ```

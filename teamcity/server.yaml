@@ -30,7 +30,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: teamcity-server
-          image: jetbrains/teamcity-server:2025.11.4
+          image: jetbrains/teamcity-server:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8111

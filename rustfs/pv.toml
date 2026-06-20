@@ -1,4 +1,3 @@
-
 [rustfs]
 name= "rustfs-data"
 namespace = "rustfs"
