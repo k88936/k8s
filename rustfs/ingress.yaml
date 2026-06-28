@@ -20,22 +20,19 @@ metadata:
   namespace: rustfs
 spec:
   forwardingTimeouts:
-    dialTimeout: 300s
-    responseHeaderTimeout: 300s
-    idleConnTimeout: 300s
+    dialTimeout: 30s
+    responseHeaderTimeout: 0
+    idleConnTimeout: 120s
 ---
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: rustfs-buffering
+  name: rustfs-redirect
   namespace: rustfs
 spec:
-  buffering:
-    maxRequestBodyBytes: 0
-    maxResponseBodyBytes: 0
-    memRequestBodyBytes: 2097152
-    memResponseBodyBytes: 2097152
-    retryExpression: IsNetworkError()
+  redirectScheme:
+    scheme: https
+    permanent: true
 ---
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
@@ -46,7 +43,6 @@ spec:
   headers:
     customRequestHeaders:
       X-Forwarded-Proto: https
-    sslRedirect: true
     accessControlAllowOriginList:
     - "*"
     accessControlAllowMethods:
@@ -58,7 +54,24 @@ spec:
     - OPTIONS
     accessControlAllowHeaders:
     - "*"
-    accessControlAllowCredentials: true
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: rustfs-redirect
+  namespace: rustfs
+spec:
+  entryPoints:
+  - web
+  routes:
+  - kind: Rule
+    match: Host(`rustfs.k88936.top`) || HostRegexp(`.+\.rustfs\.k88936\.top`)
+    middlewares:
+    - name: rustfs-redirect
+    services:
+    - name: rustfs
+      namespace: rustfs
+      port: api
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
@@ -70,9 +83,8 @@ spec:
   - websecure
   routes:
   - kind: Rule
-    match: Host(`rustfs.k88936.top`) || HostRegexp(`.+\.rustfs\.k88936\.top`) # buggy with Traefik's route matcher
+    match: Host(`rustfs.k88936.top`) || HostRegexp(`.+\.rustfs\.k88936\.top`)
     middlewares:
-    - name: rustfs-buffering
     - name: rustfs-headers
     services:
     - name: rustfs
