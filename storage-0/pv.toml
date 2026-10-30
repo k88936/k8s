@@ -1,0 +1,20 @@
+[rustfs]
+name= "rustfs-data"
+namespace = "rustfs"
+labels = { type = "boom" }
+capacity = "512Gi"
+path = [
+"k88936-sa5212m4:/mnt/boom0/",
+"k88936-sa5212m4:/mnt/boom1/",
+"k88936-sa5212m4:/mnt/boom2/",
+"k88936-sa5212m4:/mnt/boom3/",
+"k88936-sa5212m4:/mnt/boom4/",
+"k88936-sa5212m4:/mnt/boom5/",
+"k88936-sa5212m4:/mnt/boom6/",
+"k88936-sa5212m4:/mnt/boom7/",
+"k88936-sa5212m4:/mnt/boom8/",
+"k88936-sa5212m4:/mnt/boom9/",
+"k88936-sa5212m4:/mnt/boom10/",
+"k88936-sa5212m4:/mnt/boom11/",
+]
+output = "pvs/"

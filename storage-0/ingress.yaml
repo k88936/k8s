@@ -2,13 +2,12 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: rustfs-cert
-  namespace: rustfs
+  name: storage0-k88936-top
+  namespace: storage-0
 spec:
-  secretName: rustfs-tls
+  secretName: storage0-tls
   dnsNames:
-  - rustfs.k88936.top
-  - '*.rustfs.k88936.top'
+  - storage0.k88936.top
   issuerRef:
     kind: ClusterIssuer
     name: letsencrypt
@@ -16,8 +15,8 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: ServersTransport
 metadata:
-  name: rustfs-timeouts
-  namespace: rustfs
+  name: storage0-timeouts
+  namespace: storage-0
 spec:
   forwardingTimeouts:
     dialTimeout: 30s
@@ -27,8 +26,8 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: rustfs-redirect
-  namespace: rustfs
+  name: storage0-https-redirect
+  namespace: storage-0
 spec:
   redirectScheme:
     scheme: https
@@ -37,8 +36,8 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: rustfs-headers
-  namespace: rustfs
+  name: storage0-headers
+  namespace: storage-0
 spec:
   headers:
     customRequestHeaders:
@@ -58,40 +57,38 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: rustfs-redirect
-  namespace: rustfs
+  name: storage0-api-http
+  namespace: storage-0
 spec:
   entryPoints:
   - web
   routes:
   - kind: Rule
-    match: Host(`rustfs.k88936.top`) || HostRegexp(`.+\.rustfs\.k88936\.top`)
+    match: Host(`storage0.k88936.top`)
     middlewares:
-    - name: rustfs-redirect
+    - name: storage0-https-redirect
     services:
-    - name: rustfs
-      namespace: rustfs
-      port: api
+    - name: tenant-0-io
+      port: 9000
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: rustfs-api
-  namespace: rustfs
+  name: storage0-api
+  namespace: storage-0
 spec:
   entryPoints:
   - websecure
   routes:
   - kind: Rule
-    match: Host(`rustfs.k88936.top`) || HostRegexp(`.+\.rustfs\.k88936\.top`)
+    match: Host(`storage0.k88936.top`)
     middlewares:
-    - name: rustfs-headers
+    - name: storage0-headers
     services:
-    - name: rustfs
-      namespace: rustfs
-      port: api
+    - name: tenant-0-io
+      port: 9000
       passHostHeader: true
       scheme: http
-      serversTransport: rustfs-timeouts
+      serversTransport: storage0-timeouts
   tls:
-    secretName: rustfs-tls
+    secretName: storage0-tls

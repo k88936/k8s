@@ -62,6 +62,12 @@ spec:
               subPath: podman
             - name: conf
               mountPath: /data/conf
+            - name: tmp
+              mountPath: /opt/buildagent/temp/buildTmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Gi
   volumeClaimTemplates:
     - metadata:
         name: cache

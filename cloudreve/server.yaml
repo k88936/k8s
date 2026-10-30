@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: cloudreve
-          image: cloudreve/cloudreve:latest
+          image: cloudreve/cloudreve@latest
           imagePullPolicy: Always
           ports:
             - name: container-port
@@ -25,6 +25,18 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /cloudreve/data
+            - name: postgresql-config
+              mountPath: /cloudreve/data/conf.ini
+              subPath: conf.ini
+              readOnly: true
+      volumes:
+        - name: postgresql-config
+          secret:
+            secretName: cloudreve-postgresql
+            defaultMode: 0400
+            items:
+              - key: conf.ini
+                path: conf.ini
   volumeClaimTemplates:
     - metadata:
         name: data

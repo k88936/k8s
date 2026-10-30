@@ -1,0 +1,28 @@
+apiVersion: rustfs.com/v1alpha1
+kind: Tenant
+metadata:
+  name: tenant-0
+  namespace: storage-0
+spec:
+  pools:
+  - name: pool-0
+    servers: 4
+    persistence:
+      volumesPerServer: 3
+      volumeClaimTemplate:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 512Gi
+        selector:
+          matchLabels:
+            type: boom
+        storageClassName: local-storage
+  image: rustfs/rustfs:1.0.4
+  mountPath: /data
+  credsSecret:
+    name: rustfs-tenant-creds
+  rpcSecret:
+    name: rustfs-tenant-creds
+    key: rpc-secret
