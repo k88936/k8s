@@ -1,0 +1,54 @@
+architecture: standalone
+
+image:
+  registry: registry-1.docker.io
+  repository: bitnami/redis
+  tag: latest
+  digest: sha256:37c559e3894161f1b1122353a54938e30299383ae801417debda7d3e7d69490a
+  pullPolicy: IfNotPresent
+
+fullnameOverride: juicefs-redis
+
+auth:
+  enabled: true
+  sentinel: false
+  existingSecret: juicefs-redis-auth
+  existingSecretPasswordKey: redis-password
+  usePasswordFiles: true
+
+commonConfiguration: |-
+  appendonly yes
+  appendfsync everysec
+  save ""
+
+master:
+  extraFlags:
+    - "--maxmemory 768mb"
+    - "--maxmemory-policy noeviction"
+  disableCommands:
+    - FLUSHDB
+    - FLUSHALL
+  resourcesPreset: none
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      memory: 2Gi
+  persistence:
+    enabled: true
+    storageClass: longhorn
+    accessModes:
+      - ReadWriteOnce
+    size: 8Gi
+  service:
+    type: ClusterIP
+
+replica:
+  replicaCount: 0
+
+sentinel:
+  enabled: false
+
+metrics:
+  enabled: false
