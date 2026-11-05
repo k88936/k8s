@@ -5,9 +5,14 @@ metadata:
   namespace: teamcity
 data:
   SERVER_URL: "http://teamcity.teamcity:8111"
-  NO_PROXY: "localhost,127.0.0.1,::1,.local"
-  HTTP_PROXY: "http://wallence.wallence.svc.cluster.local:7890"
-  HTTPS_PROXY: "http://wallence.wallence.svc.cluster.local:7890"
+  HTTP_PROXY: &proxyUrl "http://wallence.wallence.svc.cluster.local:7890"
+  HTTPS_PROXY: *proxyUrl
+  http_proxy: *proxyUrl
+  https_proxy: *proxyUrl
+  NO_PROXY: &noProxy "localhost,127.0.0.1,::1,.local,.svc,.svc.cluster.local,teamcity.teamcity,teamcity.k88936.top"
+  no_proxy: *noProxy
+  JAVA_TOOL_OPTIONS: &jvmProxy "-Dhttp.proxyHost=wallence.wallence.svc.cluster.local -Dhttp.proxyPort=7890 -Dhttps.proxyHost=wallence.wallence.svc.cluster.local -Dhttps.proxyPort=7890 -Dhttp.nonProxyHosts=localhost|127.0.0.1|*.local|*.svc|*.svc.cluster.local|teamcity.teamcity|teamcity.k88936.top"
+  GRADLE_OPTS: *jvmProxy
 ---
 apiVersion: v1
 kind: Service

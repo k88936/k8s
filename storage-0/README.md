@@ -14,8 +14,4 @@ kubectl create secret generic rustfs-tenant-creds \
 ## Access
 
 - S3 API: `https://storage0.k88936.top` (`tenant-0-io:9000`)
-- Console: local only via `./web.sh`, then open
-  `http://localhost:9001/rustfs/console/`
-
-The console Service is `ClusterIP` and must not be published through an
-IngressRoute.
+- S3 NodePort: `http://127.0.0.1:30900` (`tenant-0-io-nodeport:9000`, fixed)
