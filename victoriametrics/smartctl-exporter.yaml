@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: smartctl-exporter
+  namespace: victoriametrics
+  labels:
+    app.kubernetes.io/name: smartctl-exporter
+    app.kubernetes.io/component: exporter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: smartctl-exporter
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: smartctl-exporter
+        app.kubernetes.io/component: exporter
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 10
+      nodeSelector:
+        kubernetes.io/os: linux
+      tolerations:
+        - operator: Exists
+      containers:
+        - name: smartctl-exporter
+          image: quay.io/prometheuscommunity/smartctl-exporter:v0.14.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - --web.listen-address=:9633
+            - --smartctl.interval=60s
+            - --smartctl.rescan=10m
+            - --smartctl.scan-device-type=by-id
+            - --smartctl.device-exclude=^scsi-36
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          ports:
+            - name: metrics
+              containerPort: 9633
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 10
+            periodSeconds: 60
+            timeoutSeconds: 50
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          volumeMounts:
+            - name: dev
+              mountPath: /dev
+            - name: udev
+              mountPath: /run/udev
+              readOnly: true
+      volumes:
+        - name: dev
+          hostPath:
+            path: /dev
+            type: Directory
+        - name: udev
+          hostPath:
+            path: /run/udev
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: smartctl-exporter
+  namespace: victoriametrics
+  labels:
+    app.kubernetes.io/name: smartctl-exporter
+    app.kubernetes.io/component: exporter
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: smartctl-exporter
+  ports:
+    - name: metrics
+      port: 9633
+      targetPort: metrics
+      protocol: TCP
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: smartctl-exporter
+  namespace: victoriametrics
+  labels:
+    app.kubernetes.io/name: smartctl-exporter
+    app.kubernetes.io/component: exporter
+spec:
+  namespaceSelector:
+    matchNames:
+      - victoriametrics
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: smartctl-exporter
+  jobLabel: app.kubernetes.io/name
+  endpoints:
+    - port: metrics
+      interval: 60s
+      scrapeTimeout: 45s
+      relabelConfigs:
+        - sourceLabels:
+            - __meta_kubernetes_pod_node_name
+          targetLabel: node
+          action: replace

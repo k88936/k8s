@@ -1,0 +1,108 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: rustfs-operator
+  namespace: victoriametrics
+  labels:
+    app.kubernetes.io/name: rustfs-operator
+    app.kubernetes.io/component: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - rustfs-system
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: operator-metrics
+      app.kubernetes.io/instance: rustfs-operator
+      app.kubernetes.io/name: rustfs-operator
+  jobLabel: app.kubernetes.io/name
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 60s
+      scrapeTimeout: 50s
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: rustfs-tenant-alerts
+  namespace: victoriametrics
+  labels:
+    app.kubernetes.io/name: rustfs-operator
+    app.kubernetes.io/component: alerting
+spec:
+  groups:
+    - name: rustfs-tenant
+      interval: 30s
+      rules:
+        - alert: RustFSOperatorDown
+          expr: up{job="rustfs-operator"} == 0
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: "RustFS Operator 指标端点不可用"
+            description: "RustFS Operator 的 /metrics 已连续 10 分钟无法抓取，Tenant 状态不再更新。"
+
+        - alert: RustFSTenantMonitorFailed
+          expr: rustfs_operator_tenant_storage_poll_success{job="rustfs-operator"} == 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "RustFS Tenant 状态轮询失败：{{ $labels.exported_namespace }}/{{ $labels.tenant }}"
+            description: "Operator 最近一次存储状态轮询失败，Tenant 的容量与驱动器指标可能已经过期。"
+
+        - alert: RustFSTenantMonitorStale
+          expr: time() - rustfs_operator_tenant_storage_last_poll_timestamp_seconds{job="rustfs-operator"} > 900
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "RustFS Tenant 指标已过期：{{ $labels.exported_namespace }}/{{ $labels.tenant }}"
+            description: "Operator 已超过 15 分钟没有成功轮询 Tenant 存储状态，请检查 Operator 日志和 RustFS 管理端口。"
+
+        - alert: RustFSTenantStorageUnhealthy
+          expr: rustfs_operator_tenant_storage_healthy{job="rustfs-operator"} == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "RustFS Tenant 存储不健康：{{ $labels.exported_namespace }}/{{ $labels.tenant }}"
+            description: "RustFS Operator 报告 Tenant 存储健康状态为不健康。"
+
+        - alert: RustFSTenantDrivesOffline
+          expr: rustfs_operator_tenant_drives_offline{job="rustfs-operator"} > 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "RustFS Tenant 有驱动器离线：{{ $labels.exported_namespace }}/{{ $labels.tenant }}"
+            description: "当前有 {{ $value }} 个驱动器离线，冗余和写入仲裁可能受影响。"
+
+        - alert: RustFSTenantDrivesHealing
+          expr: rustfs_operator_tenant_drives_healing{job="rustfs-operator"} > 0
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "RustFS Tenant 持续修复中：{{ $labels.exported_namespace }}/{{ $labels.tenant }}"
+            description: "已有 {{ $value }} 个驱动器修复超过 30 分钟，请检查 RustFS 日志与磁盘健康状态。"
+
+        - alert: RustFSTenantCapacityWarning
+          expr: 100 * rustfs_operator_tenant_raw_used_bytes{job="rustfs-operator"} / rustfs_operator_tenant_raw_capacity_bytes{job="rustfs-operator"} > 85
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "RustFS Tenant 容量使用率偏高：{{ $labels.exported_namespace }}/{{ $labels.tenant }}"
+            description: "原始容量使用率为 {{ printf \"%.1f\" $value }}%，请预留修复与写入仲裁所需空间。"
+
+        - alert: RustFSTenantCapacityCritical
+          expr: 100 * rustfs_operator_tenant_raw_used_bytes{job="rustfs-operator"} / rustfs_operator_tenant_raw_capacity_bytes{job="rustfs-operator"} > 95
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "RustFS Tenant 容量即将耗尽：{{ $labels.exported_namespace }}/{{ $labels.tenant }}"
+            description: "原始容量使用率已达 {{ printf \"%.1f\" $value }}%，继续写入可能导致对象操作失败。"

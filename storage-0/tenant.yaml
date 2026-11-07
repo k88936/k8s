@@ -4,6 +4,11 @@ metadata:
   name: tenant-0
   namespace: storage-0
 spec:
+  env:
+  - name: RUSTFS_OBJECT_LOCK_ACQUIRE_TIMEOUT
+    value: "20"
+  - name: RUSTFS_HEAL_MRF_ENABLE
+    value: "false"
   pools:
   - name: pool-0
     servers: 4

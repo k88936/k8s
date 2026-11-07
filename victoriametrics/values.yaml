@@ -1,0 +1,121 @@
+global:
+  clusterLabel: cluster
+
+fullnameOverride: vmetrics
+
+vmsingle:
+  enabled: true
+  spec:
+    retentionPeriod: 90d
+    storage:
+      storageClassName: local-path
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 50Gi
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        memory: 2Gi
+  ingress:
+    enabled: false
+
+vmagent:
+  enabled: true
+  spec:
+    scrapeInterval: 20s
+    externalLabels:
+      cluster: k88936
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+      limits:
+        memory: 1Gi
+
+vmalert:
+  enabled: true
+  spec:
+    evaluationInterval: 20s
+    externalLabels:
+      cluster: k88936
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        memory: 512Mi
+  ingress:
+    enabled: false
+
+alertmanager:
+  enabled: true
+  spec:
+    replicaCount: 1
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      receiver: blackhole
+      group_by:
+        - alertname
+        - cluster
+        - node
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 12h
+    receivers:
+      - name: blackhole
+
+grafana:
+  enabled: true
+  admin:
+    existingSecret: grafana-admin
+  ingress:
+    enabled: false
+
+syncJob:
+  env:
+    - name: HOST_IP
+      valueFrom:
+        fieldRef:
+          fieldPath: status.hostIP
+    - name: HTTP_PROXY
+      value: http://$(HOST_IP):7890
+    - name: HTTPS_PROXY
+      value: http://$(HOST_IP):7890
+    - name: NO_PROXY
+      value: localhost,127.0.0.1,::1,10.42.0.0/16,10.43.0.0/16,.svc,.cluster.local
+
+prometheus-node-exporter:
+  enabled: true
+
+kube-state-metrics:
+  enabled: true
+
+defaultRules:
+  enabled: false
+
+kubeApiServer:
+  enabled: true
+
+kubelet:
+  enabled: true
+
+coreDns:
+  enabled: true
+
+kubeControllerManager:
+  enabled: false
+
+kubeScheduler:
+  enabled: false
+
+kubeEtcd:
+  enabled: false
+
+kubeProxy:
+  enabled: false

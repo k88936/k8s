@@ -1,0 +1,195 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: smartctl-alerts
+  namespace: victoriametrics
+  labels:
+    app.kubernetes.io/name: smartctl-exporter
+    app.kubernetes.io/component: alerting
+spec:
+  groups:
+    - name: smartctl
+      interval: 30s
+      rules:
+        - alert: SmartExporterDown
+          expr: up{job="smartctl-exporter"} == 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "节点 {{ $labels.node }} 的 SMART exporter 不可用"
+            description: "SMART 指标已连续 10 分钟无法抓取，磁盘健康状态未知。"
+
+        - alert: SmartExporterNoDevices
+          expr: smartctl_devices{job="smartctl-exporter"} == 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "节点 {{ $labels.node }} 未发现可监控磁盘"
+            description: "smartctl_exporter 未返回任何设备，请检查 /dev 挂载与设备筛选规则。"
+
+        - alert: SmartStatusFailed
+          expr: smartctl_device_smart_status{job="smartctl-exporter"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "磁盘 SMART 总体状态失败：{{ $labels.device }}"
+            description: "节点 {{ $labels.node }} 上的磁盘 {{ $labels.device }} 报告 SMART 健康检查失败。"
+
+        - alert: SmartGrownDefectList
+          expr: smartctl_scsi_grown_defect_list{job="smartctl-exporter"} > 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "SAS 磁盘新增 grown defect：{{ $labels.device }}"
+            description: "节点 {{ $labels.node }} 上的 SAS 磁盘出现 grown defect，当前值为 {{ $value }}。"
+
+        - alert: SmartReallocatedSectors
+          expr: smartctl_device_attribute{job="smartctl-exporter",attribute_name="Reallocated_Sector_Ct",attribute_value_type="raw"} > 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "磁盘出现重分配扇区：{{ $labels.device }}"
+            description: "节点 {{ $labels.node }} 上的磁盘重分配扇区数为 {{ $value }}。"
+
+        - alert: SmartPendingSectors
+          expr: smartctl_device_attribute{job="smartctl-exporter",attribute_name="Current_Pending_Sector",attribute_value_type="raw"} > 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "磁盘存在待映射扇区：{{ $labels.device }}"
+            description: "节点 {{ $labels.node }} 上的磁盘待映射扇区数为 {{ $value }}。"
+
+        - alert: SmartOfflineUncorrectable
+          expr: smartctl_device_attribute{job="smartctl-exporter",attribute_name="Offline_Uncorrectable",attribute_value_type="raw"} > 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "磁盘存在离线不可纠正扇区：{{ $labels.device }}"
+            description: "节点 {{ $labels.node }} 上的磁盘离线不可纠正扇区数为 {{ $value }}。"
+
+        - alert: SmartUncorrectedErrors
+          expr: smartctl_read_total_uncorrected_errors{job="smartctl-exporter"} > 0 or smartctl_write_total_uncorrected_errors{job="smartctl-exporter"} > 0 or smartctl_verify_total_uncorrected_errors{job="smartctl-exporter"} > 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "磁盘存在未纠正 I/O 错误：{{ $labels.device }}"
+            description: "节点 {{ $labels.node }} 上的磁盘出现未纠正读写错误。"
+
+        - alert: SmartNvmeMediaErrors
+          expr: smartctl_device_media_errors{job="smartctl-exporter"} > 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "NVMe 介质错误：{{ $labels.device }}"
+            description: "节点 {{ $labels.node }} 上的 NVMe 介质错误数为 {{ $value }}。"
+
+        - alert: SmartNvmeCriticalWarning
+          expr: smartctl_device_critical_warning{job="smartctl-exporter"} > 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "NVMe 控制器告警：{{ $labels.device }}"
+            description: "节点 {{ $labels.node }} 上的 NVMe 控制器报告 critical warning={{ $value }}。"
+
+        - alert: SmartNvmeSpareLow
+          expr: smartctl_device_available_spare{job="smartctl-exporter"} < 20
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NVMe 可用备用空间偏低：{{ $labels.device }}"
+            description: "节点 {{ $labels.node }} 上的 NVMe 可用备用空间为 {{ $value }}%。"
+
+        - alert: SmartNvmeEnduranceHigh
+          expr: smartctl_device_percentage_used{job="smartctl-exporter"} > 90
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "NVMe 寿命消耗过高：{{ $labels.device }}"
+            description: "节点 {{ $labels.node }} 上的 NVMe 寿命消耗为 {{ $value }}%。"
+
+        - alert: SmartTemperatureHigh
+          expr: smartctl_device_temperature{job="smartctl-exporter",temperature_type="current"} > 50
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "磁盘温度偏高：{{ $labels.device }}"
+            description: "节点 {{ $labels.node }} 上的磁盘温度为 {{ $value }}°C。"
+
+        - alert: SmartTemperatureCritical
+          expr: smartctl_device_temperature{job="smartctl-exporter",temperature_type="current"} > 55
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "磁盘温度严重过高：{{ $labels.device }}"
+            description: "节点 {{ $labels.node }} 上的磁盘温度为 {{ $value }}°C。"
+
+        - alert: SmartSelfTestLogError
+          expr: (smartctl_device_smartctl_exit_status{job="smartctl-exporter"} % 256) >= 128
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "磁盘 SMART 自检存在错误：{{ $labels.device }}"
+            description: "节点 {{ $labels.node }} 上的磁盘 self-test log 报告错误（smartctl exit status bit 7）。"
+
+        - alert: SmartErrorLogReported
+          expr: (smartctl_device_smartctl_exit_status{job="smartctl-exporter"} % 128) >= 64
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "磁盘 SMART 错误日志非空：{{ $labels.device }}"
+            description: "节点 {{ $labels.node }} 上的磁盘 error log 存在错误记录（smartctl exit status bit 6）。"
+
+    - name: node-storage
+      interval: 30s
+      rules:
+        - alert: NodeDiskPressure
+          expr: kube_node_status_condition{condition="DiskPressure",status="true"} == 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "节点磁盘压力：{{ $labels.node }}"
+            description: "Kubernetes 报告节点 {{ $labels.node }} 正在遭受磁盘压力。"
+
+        - alert: NodeFilesystemUsageHigh
+          expr: 100 * (1 - node_filesystem_avail_bytes{fstype!~"tmpfs|ramfs|overlay|squashfs"} / node_filesystem_size_bytes{fstype!~"tmpfs|ramfs|overlay|squashfs"}) > 85
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "节点文件系统使用率偏高：{{ $labels.node }} {{ $labels.mountpoint }}"
+            description: "文件系统使用率为 {{ printf \"%.1f\" $value }}%。"
+
+        - alert: NodeFilesystemUsageCritical
+          expr: 100 * (1 - node_filesystem_avail_bytes{fstype!~"tmpfs|ramfs|overlay|squashfs"} / node_filesystem_size_bytes{fstype!~"tmpfs|ramfs|overlay|squashfs"}) > 95
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: "节点文件系统即将耗尽：{{ $labels.node }} {{ $labels.mountpoint }}"
+            description: "文件系统使用率为 {{ printf \"%.1f\" $value }}%。"
+
+        - alert: NodeInodesHigh
+          expr: 100 * (1 - node_filesystem_files_free{fstype!~"tmpfs|ramfs|overlay|squashfs"} / node_filesystem_files{fstype!~"tmpfs|ramfs|overlay|squashfs"}) > 90 and node_filesystem_files{fstype!~"tmpfs|ramfs|overlay|squashfs"} > 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "节点 inode 使用率偏高：{{ $labels.node }} {{ $labels.mountpoint }}"
+            description: "inode 使用率为 {{ printf \"%.1f\" $value }}%。"
