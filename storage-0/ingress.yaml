@@ -53,6 +53,8 @@ spec:
     - OPTIONS
     accessControlAllowHeaders:
     - "*"
+    accessControlExposeHeaders:
+    - ETag
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute

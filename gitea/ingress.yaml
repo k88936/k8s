@@ -1,0 +1,40 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: gitea-k88936-top
+  namespace: gitea
+spec:
+  secretName: gitea-tls
+  dnsNames:
+    - gitea.k88936.top
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: gitea-https-redirect
+  namespace: gitea
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: gitea-https-redirect
+  namespace: gitea
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`gitea.k88936.top`)
+      middlewares:
+        - name: gitea-https-redirect
+      services:
+        - name: gitea-http
+          port: 3000

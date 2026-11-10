@@ -1,0 +1,196 @@
+## Gitea CE，单节点单副本。
+
+global:
+  storageClass: longhorn
+
+replicaCount: 1
+
+strategy:
+  type: Recreate
+  rollingUpdate: null
+
+image:
+  registry: docker.gitea.com
+  repository: gitea
+  tag: "1.27.0"
+  pullPolicy: IfNotPresent
+  rootless: true
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 2
+    memory: 1Gi
+
+persistence:
+  enabled: true
+  create: true
+  claimName: gitea-shared-storage
+  size: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClass: longhorn
+
+service:
+  http:
+    type: ClusterIP
+    port: 3000
+  ssh:
+    type: ClusterIP
+
+ingress:
+  enabled: true
+  className: traefik
+  pathType: Prefix
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+  hosts:
+    - host: gitea.k88936.top
+      paths:
+        - path: /
+  tls:
+    - secretName: gitea-tls
+      hosts:
+        - gitea.k88936.top
+
+gitea:
+  admin:
+    ## Chart defaults contain a bootstrap admin. Keep these three empty to disable it.
+    existingSecret: ""
+    username: ""
+    password: ""
+
+  config:
+    database:
+      DB_TYPE: postgres
+      HOST: 192.168.31.24:5432
+      NAME: gitea
+      USER: gitea
+      SSL_MODE: disable
+      MAX_OPEN_CONNS: 20
+      MAX_IDLE_CONNS: 10
+      CONN_MAX_LIFETIME: 30m
+
+    server:
+      DOMAIN: gitea.k88936.top
+      ROOT_URL: https://gitea.k88936.top/
+      PROTOCOL: http
+      HTTP_PORT: 3000
+      DISABLE_SSH: true
+      START_SSH_SERVER: false
+      LFS_START_SERVER: true
+      OFFLINE_MODE: true
+
+    service:
+      DISABLE_REGISTRATION: true
+
+    mirror:
+      DEFAULT_INTERVAL: 10m
+      MIN_INTERVAL: 10m
+
+    "git.timeout":
+      MIGRATE: 3600s
+      MIRROR: 1800s
+
+    ## RustFS S3-compatible object storage.
+    storage:
+      STORAGE_TYPE: minio
+      MINIO_ENDPOINT: tenant-0-io.storage-0.svc:9000
+      MINIO_BUCKET: gitea
+      MINIO_LOCATION: us-east-1
+      MINIO_USE_SSL: false
+      MINIO_BUCKET_LOOKUP_TYPE: path
+
+    "storage.packages":
+      STORAGE_TYPE: minio
+      MINIO_ENDPOINT: tenant-0-io.storage-0.svc:9000
+      MINIO_BUCKET: gitea
+      MINIO_LOCATION: us-east-1
+      MINIO_USE_SSL: false
+      MINIO_BUCKET_LOOKUP_TYPE: path
+      MINIO_BASE_PATH: packages/
+
+    attachment:
+      STORAGE_TYPE: minio
+      MINIO_ENDPOINT: tenant-0-io.storage-0.svc:9000
+      MINIO_BUCKET: gitea
+      MINIO_LOCATION: us-east-1
+      MINIO_USE_SSL: false
+      MINIO_BUCKET_LOOKUP_TYPE: path
+      MINIO_BASE_PATH: attachments/
+
+    lfs:
+      STORAGE_TYPE: minio
+      MINIO_ENDPOINT: tenant-0-io.storage-0.svc:9000
+      MINIO_BUCKET: gitea
+      MINIO_LOCATION: us-east-1
+      MINIO_USE_SSL: false
+      MINIO_BUCKET_LOOKUP_TYPE: path
+      MINIO_BASE_PATH: lfs/
+
+    packages:
+      ENABLED: true
+
+    actions:
+      ENABLED: false
+
+    session:
+      PROVIDER: file
+      PROVIDER_CONFIG: /data/gitea/sessions
+
+    cache:
+      ADAPTER: memory
+
+    queue:
+      TYPE: channel
+
+    security:
+      INSTALL_LOCK: true
+
+deployment:
+  env:
+    - name: HTTP_PROXY
+      value: http://192.168.31.24:7890
+    - name: HTTPS_PROXY
+      value: http://192.168.31.24:7890
+    - name: NO_PROXY
+      value: 127.0.0.1,localhost,.svc,.cluster.local,192.168.31.0/24,10.42.0.0/16,10.43.0.0/16
+    - name: http_proxy
+      value: http://192.168.31.24:7890
+    - name: https_proxy
+      value: http://192.168.31.24:7890
+    - name: no_proxy
+      value: 127.0.0.1,localhost,.svc,.cluster.local,192.168.31.0/24,10.42.0.0/16,10.43.0.0/16
+    - name: GITEA__database__PASSWD
+      valueFrom:
+        secretKeyRef:
+          name: gitea-db-secret
+          key: password
+    - name: MINIO_ROOT_USER
+      valueFrom:
+        secretKeyRef:
+          name: gitea-s3-secret
+          key: access-key
+    - name: MINIO_ROOT_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: gitea-s3-secret
+          key: secret-key
+
+postgresql:
+  enabled: false
+
+postgresql-ha:
+  enabled: false
+
+valkey-cluster:
+  enabled: false
+
+valkey:
+  enabled: false
+
+test:
+  enabled: false

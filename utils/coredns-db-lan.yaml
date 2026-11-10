@@ -1,0 +1,19 @@
+---
+# k3s imports /etc/coredns/custom/*.server as extra server blocks.
+# A separate zone block avoids adding a second hosts plugin to the main .:53
+# server block. Keep the public DNS record for external clients, but resolve
+# the database to the node's LAN address for pods.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-custom
+  namespace: kube-system
+data:
+  db.server: |
+    db.k88936.top:53 {
+      errors
+      hosts {
+        192.168.31.24 db.k88936.top
+        fallthrough
+      }
+    }
