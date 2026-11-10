@@ -51,7 +51,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: kvtodev/teamcity-agent:latest
+          image: gitea.k88936.top:8936/k88936/teamcity-agent:latest
           imagePullPolicy: Always
           securityContext:
             privileged: true
